@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Pihu's forever place 💖</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    /* animated gradient background (motion) */
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #ffd1dc, #ffe4f0, #ffe0f0, #ffd9e8);
+      background-size: 300% 300%;
+      animation: gradientShift 18s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* canvas for advanced particle system */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* let clicks pass through */
+      z-index: 1;
+    }
+
+    /* glass panel effect */
+    .glass {
+      background: rgba(255, 245, 250, 0.3);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border-radius: 42px;
+      border: 1px solid rgba(255, 220, 240, 0.4);
+      box-shadow: 0 30px 50px rgba(245, 150, 180, 0.25),
+                  0 0 0 1px rgba(255, 200, 220, 0.3) inset;
+    }
+
+    /* lock screen + main container */
+    .screen {
+      width: 100%;
+      max-width: 1100px; /* wider for gallery */
+      margin: 20px auto;
+      padding: 28px 22px;
+      position: relative;
+      z-index: 10;
+      transition: all 0.3s ease;
+      color: #5e3a4c;
+    }
+
+    #lock-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    #main-content {
+      display: none;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* romantic titles */
+    .romantic-title {
+      font-size: 2.4rem;
+      font-weight: 600;
+      background: linear-gradient(130deg, #ff85a8, #b47c9c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px #ffb6d1;
+      letter-spacing: 1px;
+    }
+
+    .sub-message {
+      font-size: 1.5rem;
+      color: #a64d79;
+      background: rgba(255, 255, 255, 0.4);
+      padding: 8px 24px;
+      border-radius: 60px;
+      display: inline-block;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 10px rgba(255, 200, 220, 0.5);
+    }
+
+    /* countdown badge */
+    .countdown-card {
+      background: rgba(255, 235, 245, 0.7);
+      border-radius: 48px;
+      padding: 18px 22px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 1.7rem;
+      color: #bc6f9c;
+      box-shadow: 0 8px 24px #ffc0d5;
+      border: 1px solid #ffffff8a;
+      backdrop-filter: blur(4px);
+    }
+
+    /* button styles */
+    .button-romance {
+      background: linear-gradient(135deg, #ffb3c6, #ff9eb5);
+      border: none;
+      color: #4b2e3b;
+      font-weight: 600;
+      font-size: 1.25rem;
+      padding: 14px 28px;
+      border-radius: 50px;
+      box-shadow: 0 10px 18px #ffb8cf, 0 4px 0 #d48ca6;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid #fff8fb;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+      width: fit-content;
+    }
+
+    .button-romance:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 26px #fbaac4, 0 6px 0 #c27497;
+    }
+
+    .button-romance:active {
+      transform: translateY(4px);
+      box-shadow: 0 6px 12px #f598b6;
+    }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* image & video styling */
+    .media-glow {
+      border-radius: 36px;
+      box-shadow: 0 20px 30px #feb6d0, 0 0 0 5px rgba(255, 240, 250, 0.7);
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      transition: 0.2s;
+    }
+
+    .media-glow:hover {
+      box-shadow: 0 20px 40px #ffa7c4, 0 0 0 6px #ffe2f0;
+    }
+
+    video.media-glow {
+      max-height: 280px;
+      width: 100%;
+      background: #ffeaf2;
+      object-fit: cover;
+    }
+
+    img.media-glow {
+      max-height: 280px;
+      object-fit: cover;
+      width: 100%;
+    }
+
+    /* photo grid for 10 cards (same style as before, extended) */
+    .photo-grid-8 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 25px;
+      margin: 30px 0;
+      perspective: 1500px;
+    }
+
+    .photo-card-8 {
+      background: rgba(255, 220, 240, 0.3);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      padding: 12px;
+      box-shadow: 0 20px 30px rgba(255, 120, 170, 0.4);
+      transition: transform 0.25s ease, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      border: 2px solid #ffa6c9; /* thin neon pink glow */
+      box-shadow: 0 0 15px #ff80b0, 0 10px 25px rgba(255, 80, 140, 0.5);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .photo-card-8:hover {
+      transform: rotateY(7deg) rotateX(5deg) scale(1.05);
+      box-shadow: 0 0 30px #ffb0d0, 0 25px 35px #ffa0c0;
+      border-color: #ffc0e0;
+    }
+
+    .photo-card-8 img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 28px;
+      display: block;
+      box-shadow: 0 10px 18px #d46a96;
+      transition: inherit;
+    }
+
+    /* fallback for missing images */
+    .photo-card-8 .fallback {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(135deg, #ffb8d2, #ffd0e4);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      color: #a1466e;
+    }
+
+    /* video grid for 4 items (same style) */
+    .video-grid-3 {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    .video-item {
+      background: rgba(255, 235, 245, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 48px;
+      padding: 18px;
+      border: 2px solid #ffa6c9;
+      box-shadow: 0 0 20px #ffa0c0, 0 15px 25px #ffb0c8;
+      transition: opacity 0.8s ease, transform 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .video-item.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .video-item video {
+      width: 100%;
+      border-radius: 36px;
+      outline: none;
+      box-shadow: 0 10px 20px #f598b6;
+    }
+
+    /* secret modal */
+    #secretModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInModal 0.5s;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; backdrop-filter: blur(0); }
+      to { opacity: 1; backdrop-filter: blur(12px); }
+    }
+
+    .modal-content {
+      background: rgba(255, 240, 250, 0.9);
+      backdrop-filter: blur(16px);
+      border-radius: 60px;
+      padding: 30px 25px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 3px solid #ffb0d0;
+      box-shadow: 0 40px 60px #ffa0c0;
+      color: #3f2a36;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .close-modal {
+      float: right;
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #a55377;
+    }
+
+    /* top secret button */
+    #secretBtn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
+      background: rgba(255, 200, 220, 0.8);
+      backdrop-filter: blur(6px);
+      border: 2px solid #ffa5c3;
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      box-shadow: 0 10px 18px #f598b6;
+      cursor: pointer;
+      color: #5a2e44;
+      font-weight: 600;
+    }
+
+    /* message box (love reasons) with fade animation */
+    .message-box {
+      background: rgba(255, 215, 230, 0.7);
+      backdrop-filter: blur(6px);
+      border-radius: 36px;
+      padding: 24px 28px;
+      font-size: 1.5rem;
+      color: #5a3648;
+      border: 1px solid #ffe5f0;
+      box-shadow: 0 12px 28px #fac0d2;
+      animation: softFadeIn 0.6s ease;
+    }
+
+    @keyframes softFadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-box ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .message-box li {
+      margin: 10px 0;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* password input */
+    .password-input {
+      background: rgba(255, 230, 245, 0.8);
+      border: 2px solid #ffbfd6;
+      border-radius: 48px;
+      padding: 18px 28px;
+      font-size: 1.3rem;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+      color: #411e2f;
+      outline: none;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 8px 0 #e3a6bb;
+    }
+
+    .password-input:focus {
+      border-color: #ff90b5;
+      background: #fff0f7;
+    }
+
+    .lock-icon {
+      font-size: 4rem;
+      filter: drop-shadow(0 8px 12px #fba6c4);
+    }
+
+    /* responsive */
+    @media (max-width: 600px) {
+      .romantic-title { font-size: 2rem; }
+      .photo-grid-8 { grid-template-columns: repeat(2, 1fr); }
+      .modal-content { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- canvas for advanced particle system -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- top secret button -->
+  <button id="secretBtn">🔐 Secret</button>
+
+  <!-- lock screen panel -->
+  <div id="lock-screen" class="screen glass">
+    <div class="lock-icon">🔐💗</div>
+    <div style="font-size: 2rem; font-weight: 300; color: #973c63;">enter password</div>
+    <input type="password" id="passwordInput" class="password-input" placeholder="• • • • • • • • • •" value="">
+    <button class="button-romance" id="unlockBtn">unlock my heart ✨</button>
+    <div style="color: #ad6486; font-size: 1rem; margin-top: 10px;">(hint: I love you arise)</div>
+  </div>
+
+  <!-- main content (hidden until correct password) -->
+  <div id="main-content" class="screen glass">
+    <h1 class="romantic-title">Hey Pihu 💖</h1>
+    <div class="sub-message">You are my forever person 🌍</div>
+
+    <!-- birthday countdown -->
+    <div class="countdown-card" id="birthdayCountdown">🎂 Pihu's Birthday in: -- Days -- Hours</div>
+
+    <!-- interactive section -->
+    <div class="flex-row">
+      <button class="button-romance" id="whyLoveBtn">Why I Love You 💭</button>
+      <button class="button-romance button-outline" id="surpriseBtn">Surprise 🎁</button>
+    </div>
+
+    <!-- dynamic message areas -->
+    <div id="loveReasonsBox" class="message-box" style="display: none;"></div>
+    <div id="surpriseBox" class="message-box" style="display: none;">🎀</div>
+
+    <!-- original single photo & video -->
+    <div style="display: flex; flex-direction: column; gap: 22px;">
+      <img src="pihu.jpg" alt="Pihu's beautiful smile" class="media-glow" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22300%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23ffd9e6%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22160%22%20font-size%3D%2224%22%20fill%3D%22%23944e6b%22%3Epihu.jpg%3C%2Ftext%3E%3C%2Fsvg%3E';">
+
+      <video controls class="media-glow" poster="">
+        <source src="memory.mp4" type="video/mp4">
+        <div style="background: #ffddee; padding: 30px;">✨ memory.mp4 (fallback)</div>
+      </video>
+    </div>
+
+    <!-- ===== 10 PHOTO SECTION (with toggle play/pause) ===== -->
+    <h2 style="font-size: 2rem; color: #aa6e88; text-align: center;">10 Precious Moments ✨</h2>
+    <div class="photo-grid-8" id="photoGrid8"></div>
+
+    <!-- ===== 4 VIDEO SECTIONS (smart playback) ===== -->
+    <h2 style="font-size: 2rem; color: #aa6e88; text-align center;">Beautiful Memories 🎥</h2>
+    <div class="video-grid-3" id="videoGrid3"></div>
+
+    <!-- music control (original) -->
+    <div style="display: flex; justify-content: center; margin: 6px 0;">
+      <button class="button-romance" id="musicToggleBtn">Play Music 🎵</button>
+    </div>
+    <audio id="bgMusic" src="untilfoundyou.mp3" preload="auto" loop></audio>
+  </div>
+
+  <!-- secret modal (hidden) -->
+  <div id="secretModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModal">&times;</button>
+      <div id="secretMessageArea" style="display: none;">
+        <p style="white-space: pre-line; font-family: inherit;">
+Shayad ye mera last msg hai tumhare liye, isliye ise pura padhna please 🙏 ye meri request hai.  
+Main tumhe sach me pasand karta hu ❤️ lekin shayad tum mujhe pasand nahi karti… kyunki agar karti to shayad meri thodi care bhi karti. Jo bhi ho, ab mujhe lagta hai hame aur baat nahi karni chahiye, kyuki aur baat karne se shayad main fir se tumhe pasand karne lag jau 💔  
+Tum jise bhi pasand karti ho, I hope tum uske sath khush raho 😊 aur wo tumhe kabhi cheat na kare ✨  
+Main tumhara second option bankar rehna chahta tha… lekin shayad tum wo bhi nahi chahti. Main tumhare msg ka wait karta rehta hu, lekin tum msg nahi karti… shayad ye bhi meri hi galat expectation thi.  
+Aur haan, jo bhi maine likha hai shayad main galat bhi ho sakta hu, to mujhe maaf kar dena 🙏 sorry 🤍  
+Mujhe pata tha tum kisi aur ko pasand karti ho, phir bhi maine try kiya… kyuki mujhe laga dil se pyaar karne se shayad tum mil jao. Effort marta raha, lekin shayad main galat tha. Shayad maine tumse acche se baat nahi ki, jis wajah se tumne mujhe red flag samjha ho… uske liye bhi sorry.  
+Mera intention kabhi galat nahi tha. Main tumhare sath kabhi gandi baatein nahi karna chahta tha. Shayad tumhe kisi baat se bura laga ho to uske liye bhi sorry 🤍  
+Main tumse aur baat nahi karna chahta kyuki mujhe sab pata hai… main tumhe force nahi karna chahta. Agar tum kisi aur ko pasand karti ho, to main tumhe rokunga nahi. Pyaar zabardasti se nahi hota.  
+Main tumhari happiness chahta hoon, chahe wo mere saath ho ya nahi 🌸  
+Bas itna chahunga ki jo bhi decision lo, dil se lo.  
+Aur main tumhe chhodkar nahi ja raha, isliye mujhe un 4 logo me mat ginna jo tumhe chhod kar gaye hain.  
+Shayad tum mujhe isliye pasand nahi karti kyuki mera religion alag hai ya main tumse umar me bada hu… jo bhi ho.  
+Kabhi bhi meri zarurat ho to mujhe msg karna, main puri koshish karunga tumhari help karne ki 🤍  
+Aur bhi bahut kuch bolna tha, lekin shayad ab nahi bol sakta…  
+Bas itna hi —  
+Tum khush raho 😊  
+Bye. Take care.
+        </p>
+        <audio id="khatAudio" src="khat.mp3" preload="auto"></audio>
+        <div class="upload-input">
+          <label for="secretImageUpload">📸 Upload your image:</label>
+          <input type="file" id="secretImageUpload" accept="image/*">
+        </div>
+      </div>
+      <div id="secretPasswordArea">
+        <h3>🔒 Secret message</h3>
+        <input type="password" id="secretPassword" class="modal-password" placeholder="enter password">
+        <button class="button-romance" id="submitSecretPwd">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ========== 1. SCREENSHOT PREVENTION ==========
+      document.addEventListener('contextmenu', e => e.preventDefault());
+
+      document.addEventListener('keydown', e => {
+        const key = e.key;
+        if (key === 'PrintScreen' || key === 'F12' || (e.ctrlKey && e.shiftKey && (key === 'S' || key === 'I' || key === 'J')) || (e.ctrlKey && key === 'U') || (e.ctrlKey && e.shiftKey && key === 'C')) {
+          e.preventDefault();
+          alert('📸 Screenshot/DevTools keys are disabled.');
+        }
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          document.body.style.filter = 'blur(12px)';
+        } else {
+          document.body.style.filter = 'none';
+        }
+      });
+
+      (function detectDevTools() {
+        const start = new Date();
+        debugger;
+        const end = new Date();
+        if (end - start > 100) {
+          alert('⚠️ Developer tools detected. Please close them for privacy.');
+        }
+      })();
+
+      // ========== 2. CANVAS PARTICLE SYSTEM ==========
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+      const PARTICLE_COUNT = 80;
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      class Particle {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.vx = (Math.random() - 0.5) * 0.8;
+          this.vy = (Math.random() - 0.5) * 0.8;
+          this.size = 8 + Math.random() * 16;
+          this.type = Math.random() > 0.6 ? '✨' : '❤️';
+          this.opacity = 0.3 + Math.random() * 0.6;
+          this.glow = 8 + Math.random() * 15;
+        }
+        update(mouseX, mouseY) {
+          if (mouseX && mouseY) {
+            const dx = this.x - mouseX;
+            const dy = this.y - mouseY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 100) {
+              const force = (100 - dist) / 1000;
+              this.vx += dx * force;
+              this.vy += dy * force;
+            }
+          }
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < 0) this.x = width;
+          if (this.x > width) this.x = 0;
+          if (this.y < 0) this.y = height;
+          if (this.y > height) this.y = 0;
+
+          this.vx *= 0.99;
+          this.vy *= 0.99;
+        }
+        draw() {
+          ctx.font = `${this.size}px 'Segoe UI', 'Arial Unicode MS', sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = '#ffa0c0';
+          ctx.shadowBlur = this.glow;
+          ctx.globalAlpha = this.opacity;
+          ctx.fillText(this.type, this.x, this.y);
+        }
+      }
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push(new Particle());
+      }
+
+      let mouseX = null, mouseY = null;
+      canvas.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+      canvas.addEventListener('mouseleave', () => {
+        mouseX = mouseY = null;
+      });
+
+      function animateParticles() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          p.update(mouseX, mouseY);
+          p.draw();
+        });
+        requestAnimationFrame(animateParticles);
+      }
+      animateParticles();
+
+      // ========== 3. LOCK SCREEN LOGIC ==========
+      const lockScreen = document.getElementById('lock-screen');
+      const mainScreen = document.getElementById('main-content');
+      const unlockBtn = document.getElementById('unlockBtn');
+      const pwdInput = document.getElementById('passwordInput');
+
+      function unlockApp() {
+        if (pwdInput.value === 'I love you arise') {
+          lockScreen.style.display = 'none';
+          mainScreen.style.display = 'flex';
+        } else {
+          alert('💔 wrong password, try again with love');
+        }
+      }
+      unlockBtn.addEventListener('click', unlockApp);
+      pwdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') unlockApp(); });
+
+      // ========== 4. COUNTDOWN ==========
+      function updateCountdown() {
+        const now = new Date();
+        let year = now.getFullYear();
+        let birthday = new Date(year, 6, 11);
+        if (now > birthday) birthday = new Date(year+1, 6, 11);
+        const diffMs = birthday - now;
+        const diffDays = Math.floor(diffMs / (86400000));
+        const diffHours = Math.floor((diffMs % 86400000) / 3600000);
+        document.getElementById('birthdayCountdown').innerText = `🎂 Pihu's Birthday in: ${diffDays} Days ${diffHours} Hours`;
+      }
+      updateCountdown();
+      setInterval(updateCountdown, 3600000);
+
+      // ========== 5. WHY LOVE & SURPRISE (UPDATED) ==========
+      const whyBtn = document.getElementById('whyLoveBtn');
+      const loveBox = document.getElementById('loveReasonsBox');
+      const surpriseBox = document.getElementById('surpriseBox');
+
+      whyBtn.addEventListener('click', () => {
+        loveBox.style.display = 'block';
+        loveBox.innerHTML = `
+          <ul style="list-style: none;">
+            <li>💖 Tumhari Smile 😊: Jo meri puri duniya roshan kar deti hai. 🌟</li>
+            <li>💖 Masoomiyat ☁️: Tumhara wo pyara bachpana aur saaf dil. ❤️</li>
+            <li>💖 Cute Gussa 😤: Jab tum naak chadhati ho toh aur bhi pyari lagti ho. 🎀</li>
+            <li>💖 Care 🤗: Jis tarah tum mera har choti baat par khayal rakhti ho. 🧿</li>
+            <li>💖 Aankhein 👀: Jinmein mujhe sabse zyada sukoon milta hai. ✨</li>
+            <li>💖 Baatein 💬: Tumse ghanto baat karke bhi mann nhi bharta. 🐊</li>
+            <li>💖 Dosti 👩‍❤️‍👨: Tum meri sabse achi dost pehle ho. ♾️</li>
+            <li>💖 Sirf Tum 💎: Kyunki tum jaisi is duniya me koi aur nhi. 🌍</li>
+          </ul>
+        `;
+        surpriseBox.style.display = 'none';
+      });
+
+      document.getElementById('surpriseBtn').addEventListener('click', () => {
+        surpriseBox.style.display = 'block';
+        surpriseBox.innerHTML = `Pihu, you are my today, tomorrow and forever ❤️`;
+        loveBox.style.display = 'none';
+      });
+
+      // ========== 6. MUSIC TOGGLE ==========
+      const audio = document.getElementById('bgMusic');
+      const musicBtn = document.getElementById('musicToggleBtn');
+      musicBtn.addEventListener('click', () => {
+        if (audio.paused) {
+          audio.play().catch(() => alert('🎶 click again to play'));
+          musicBtn.textContent = 'Pause Music ⏸️';
+        } else {
+          audio.pause();
+          musicBtn.textContent = 'Play Music 🎵';
+        }
+      });
+
+      // ========== 7. 10 PHOTO GALLERY with TOGGLE PLAY/PAUSE ==========
+      const photoGrid = document.getElementById('photoGrid8');
+      const audioElements = []; // store all audio objects
+      let currentlyPlayingAudio = null; // track currently playing audio
+
+      for (let i = 1; i <= 10; i++) { // now 10 photos
+        const card = document.createElement('div');
+        card.className = 'photo-card-8';
+        const img = document.createElement('img');
+        img.src = `photo${i}.jpg`;
+        img.alt = `Memory ${i}`;
+        img.onerror = () => {
+          const fallback = document.createElement('div');
+          fallback.className = 'fallback';
+          const emojis = ['💕','💖','💗','💓','💞','💘','💝','💟','💖','💗'];
+          fallback.textContent = emojis[i-1] || '💖';
+          card.innerHTML = '';
+          card.appendChild(fallback);
+        };
+        card.appendChild(img);
+
+        // create hidden audio for this photo
+        const aud = document.createElement('audio');
+        aud.src = `song${i}.mp3`;
+        aud.preload = 'auto';
+        aud.style.display = 'none';
+        card.appendChild(aud);
+        audioElements.push(aud);
+
+        // click handler for toggle play/pause
+        card.addEventListener('click', (e) => {
+          // if same audio is playing, pause it
+          if (currentlyPlayingAudio === aud && !aud.paused) {
+            aud.pause();
+            currentlyPlayingAudio = null;
+          } else {
+            // pause any other playing audio
+            if (currentlyPlayingAudio && !currentlyPlayingAudio.paused) {
+              currentlyPlayingAudio.pause();
+            }
+            aud.play().catch(() => alert(`🎵 song${i}.mp3 not found`));
+            currentlyPlayingAudio = aud;
+          }
+        });
+
+        photoGrid.appendChild(card);
+      }
+
+      // ========== 8. 4 VIDEO SECTIONS (smart playback) ==========
+      const videoGrid = document.getElementById('videoGrid3');
+      const videos = []; // store video elements
+
+      for (let i = 1; i <= 4; i++) { // now 4 videos
+        const item = document.createElement('div');
+        item.className = 'video-item';
+        const video = document.createElement('video');
+        video.controls = true;
+        video.src = `video${i}.mp4`;
+        video.onerror = () => { item.innerHTML = `<div style="padding:30px;">video${i}.mp4 not found</div>`; };
+        item.appendChild(video);
+        videoGrid.appendChild(item);
+        videos.push(video);
+      }
+
+      // Add play event listener to each video to pause others
+      videos.forEach(v => {
+        v.addEventListener('play', () => {
+          videos.forEach(other => {
+            if (other !== v && !other.paused) {
+              other.pause();
+            }
+          });
+        });
+      });
+
+      // Intersection Observer for fade-in
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('show');
+        });
+      }, { threshold: 0.3 });
+      document.querySelectorAll('.video-item').forEach(el => observer.observe(el));
+
+      // ========== 9. SECRET MODAL ==========
+      const secretBtn = document.getElementById('secretBtn');
+      const modal = document.getElementById('secretModal');
+      const closeModal = document.getElementById('closeModal');
+      const secretPwdArea = document.getElementById('secretPasswordArea');
+      const secretMsgArea = document.getElementById('secretMessageArea');
+      const submitPwd = document.getElementById('submitSecretPwd');
+      const secretPwdInput = document.getElementById('secretPassword');
+      const khatAudio = document.getElementById('khatAudio');
+
+      secretBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        secretPwdArea.style.display = 'block';
+        secretMsgArea.style.display = 'none';
+        secretPwdInput.value = '';
+      });
+
+      closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+        khatAudio.pause();
+        khatAudio.currentTime = 0;
+      });
+
+      submitPwd.addEventListener('click', () => {
+        if (secretPwdInput.value === 'I hate you arise') {
+          secretPwdArea.style.display = 'none';
+          secretMsgArea.style.display = 'block';
+          khatAudio.play().catch(() => alert('khat.mp3 not found'));
+        } else {
+          alert('❌ Incorrect secret password');
+        }
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          khatAudio.pause();
+        }
+      });
+
+      // ========== 10. ADDITIONAL SAFEGUARDS ==========
+      window.addEventListener('blur', () => {
+        if (!document.hidden) document.body.style.filter = 'blur(6px)';
+      });
+      window.addEventListener('focus', () => {
+        document.body.style.filter = 'none';
+      });
+
+      // double-click heart effect
+      mainScreen.addEventListener('dblclick', (e) => {
+        const heart = document.createElement('div');
+        heart.textContent = '💖';
+        heart.style.position = 'fixed';
+        heart.style.left = e.clientX + 'px';
+        heart.style.top = e.clientY + 'px';
+        heart.style.fontSize = '3rem';
+        heart.style.pointerEvents = 'none';
+        heart.style.zIndex = '9999';
+        heart.style.animation = 'floatUp 2s ease-out forwards';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1900);
+      });
+
+      // inject floatUp keyframe if missing (already in style)
+    })();
+  </script>
+  <noscript>please enable javascript for love</noscript>
+</body>
+</html>
